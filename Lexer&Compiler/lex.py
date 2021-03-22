@@ -7,6 +7,7 @@ class Lexer:
         self.curChar = '' # Current character in the string
         self.curPos = -1 # Current position in the string
         self.nextChar()
+        self.numberline = 1
     
     # Process the next character
     def nextChar(self):
@@ -89,7 +90,7 @@ class Lexer:
                 self.nextChar()
                 token = Token(lastChar + self.curChar, TokenType.NOTEQ)
             else:
-                self.abort("Expected !=, got !" + self.peek())
+                self.abort("Expected !=, got !" + self.peek() + " at line: " + str(self.numberline))
 
         elif(self.curChar == '\"'):
             # Get characters between quotations
@@ -100,7 +101,7 @@ class Lexer:
                 # Don't allow special characters in the string 
                 # We will be using C's printf on this string
                 if(self.curChar == '\r' or self.curChar == '\n' or self.curChar == '\t' or self.curChar == '\\' or self.curChar == '%'):
-                    self.abort("Illegal character in string")
+                    self.abort("Illegal character in string" + " at line: " + str(self.numberline))
                 self.nextChar()
             
             tokText = self.source[startPos : self.curPos] # Get the substring
@@ -118,7 +119,7 @@ class Lexer:
                 # MUST have at least one digit after decimal
                 if(not self.peek().isdigit()):
                     # ERROR!
-                    self.abort("Illegal character in number.")
+                    self.abort("Illegal character in number." + " at line: " + str(self.numberline))
                 while(self.peek().isdigit()):
                     self.nextChar()
             
@@ -141,13 +142,14 @@ class Lexer:
 
         elif (self.curChar == '\n'):
             token = Token(self.curChar, TokenType.NEWLINE)
+            self.numberline += 1
 
         elif (self.curChar == '\0'):
             token = Token('', TokenType.EOF)
 
         else:
             # Unknown token!
-            self.abort("Unkonw Token: " + self.curChar)
+            self.abort("Unkonw Token: " + self.curChar + " at line: " + str(self.numberline))
 			
         self.nextChar()
         return token

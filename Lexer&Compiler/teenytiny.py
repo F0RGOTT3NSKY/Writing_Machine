@@ -1,12 +1,17 @@
 from lex import *
+from parse import *
+import sys
 
 def main():
-    input = "IF+-123 foo*THEN/"
-    lexer = Lexer(input)
+    print("Teeny Tiny Compiler")
 
-    token = lexer.getToken()
-    while token.kind != TokenType.EOF:
-        print(token.kind)
-        token = lexer.getToken()
+    with open('hello.tiny', 'r') as inputFile:
+        file = inputFile.read()
+
+    lexer = Lexer(file)
+    parser = Parser(lexer)
+
+    parser.program()
+    print("Parsing is completed")
 
 main()
