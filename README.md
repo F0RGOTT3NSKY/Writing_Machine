@@ -15,10 +15,9 @@
 
 ## Dependencias
 Una lista de las tecnologías usadas en el proyecto
-***
 * [Python 3.9.2](https://www.python.org/downloads/)
 * [PyQt5](https://pypi.org/project/PyQt5/)
-
+***
 ## Instalación
 Para obtener la extensión, clone el repositorio
 ```
