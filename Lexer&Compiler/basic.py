@@ -13,8 +13,8 @@ import math
 #################################################
 
 DIGITS = '0123456789'
-LETTERS = string.ascii_letters
-LETTERS_DIGITS = LETTERS + DIGITS
+LETTERS = string.ascii_letters + '@' + '&' + '_'
+LETTERS_DIGITS = LETTERS + DIGITS 
 
 ##############################################
 #                   ERRORS                   #
@@ -124,7 +124,7 @@ TT_NEWLINE      = 'NEWLINE'
 TT_EOF          = 'EOF'
 
 KEYWORDS = [
-    'VAR',
+    'DEF',
     'AND',
     'OR',
     'NOT',
@@ -136,8 +136,8 @@ KEYWORDS = [
     'TO',
     'STEP',
     'WHILE',
-    'FUN',
-    'END',
+    'PARA',
+    'FIN',
     'RETURN',
     'CONTINUE',
     'BREAK'
@@ -640,14 +640,14 @@ class Parser:
         if(res.error):
             return res.failure(IllegalSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected 'RETURN', 'CONTINUE', 'BREAK', 'VAR', 'IF', 'FOR', 'While', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
+                "Expected 'RETURN', 'CONTINUE', 'BREAK', 'DEF', 'IF', 'FOR', 'While', 'PARA', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
             ))
         return res.success(expr)
 
     def expr(self):
         res = ParseResult()
 
-        if(self.current_tok.matches(TT_KEYWORD, 'VAR')):
+        if(self.current_tok.matches(TT_KEYWORD, 'DEF')):
             res.register_advancement()
             self.advance()
             
@@ -658,6 +658,11 @@ class Parser:
                 ))
 
             var_name = self.current_tok
+            if(len(var_name.value) > 10 or len(var_name.value) < 3):
+                return res.failure(IllegalSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end,
+                    "Variable length more than 10 or less than 3"
+                ))
             res.register_advancement()
             self.advance()
 
@@ -678,7 +683,7 @@ class Parser:
         if(res.error):
             return res.failure(IllegalSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected 'VAR', 'IF', 'FOR', 'While', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
+                "Expected 'DEF', 'IF', 'FOR', 'While', 'PARA', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
             ))
 
         return res.success(node)
@@ -745,7 +750,7 @@ class Parser:
                 if(res.error):
                     return res.failure(IllegalSyntaxError(
                         self.current_tok.pos_start, self.current_tok.pos_end,
-                        f"Expected ')', 'VAR', 'IF', 'FOR', 'WHILE', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
+                        f"Expected ')', 'DEF', 'IF', 'FOR', 'WHILE', 'PARA', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
                     ))
 
                 while(self.current_tok.type == TT_COMMA):
@@ -820,14 +825,14 @@ class Parser:
             if(res.error): return res
             return res.success(while_expr)
 
-        elif(tok.matches(TT_KEYWORD, 'FUN')):
+        elif(tok.matches(TT_KEYWORD, 'PARA')):
             func_def = res.register(self.func_def())
             if(res.error): return res
             return res.success(func_def)
         
         return res.failure(IllegalSyntaxError(
             tok.pos_start, tok.pos_end,
-            "Expected int, float, identifier '+', '-','(', '[', 'IF', 'FOR', 'While' or 'FUN'"
+            "Expected int, float, identifier '+', '-','(', '[', 'IF', 'FOR', 'While' or 'PARA'"
         ))
 
     def list_expr(self):
@@ -852,7 +857,7 @@ class Parser:
             if(res.error):
                 return res.failure(IllegalSyntaxError(
                     self.current_tok.pos_start, self.current_tok.pos_end,
-                    "Expected ']', 'VAR', 'IF', 'FOR', 'WHILE', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
+                    "Expected ']', 'DEF', 'IF', 'FOR', 'WHILE', 'PARA', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
                 ))
 
             while(self.current_tok.type == TT_COMMA):
@@ -1123,10 +1128,10 @@ class Parser:
     def func_def(self):
         res = ParseResult()
 
-        if(not self.current_tok.matches(TT_KEYWORD, 'FUN')):
+        if(not self.current_tok.matches(TT_KEYWORD, 'PARA')):
             return res.failure(IllegalSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                f"Expected FUN"
+                f"Expected PARA"
             ))
         
         res.register_advancement()
@@ -1213,10 +1218,10 @@ class Parser:
         body = res.register(self.statements())
         if(res.error): return res
 
-        if(not self.current_tok.matches(TT_KEYWORD, 'END')):
+        if(not self.current_tok.matches(TT_KEYWORD, 'FIN')):
             return res.failure(IllegalSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                f"Expected 'END'"
+                f"Expected 'FIN'"
             ))
 
         res.register_advancement()
@@ -1825,7 +1830,7 @@ class BuiltInFunction(BaseFunction):
         if(not isinstance(fn, String)):
             return RTResult().failure(RTError(
                 self.pos_start, self.pos_end,
-                "Second argument must be a string",
+                "First argument must be a string",
                 exec_ctx
             ))
 
@@ -1853,20 +1858,195 @@ class BuiltInFunction(BaseFunction):
         return RTResult().success(Number.null)
     execute_run.arg_names = ["fn"]
 
-BuiltInFunction.print       = BuiltInFunction("print")
-BuiltInFunction.print_ret   = BuiltInFunction("print_ret")
-BuiltInFunction.input       = BuiltInFunction("input")
-BuiltInFunction.input_int   = BuiltInFunction("input_int")
-BuiltInFunction.clear       = BuiltInFunction("clear")
-BuiltInFunction.is_number   = BuiltInFunction("is_number")
-BuiltInFunction.is_string   = BuiltInFunction("is_string")
-BuiltInFunction.is_list     = BuiltInFunction("is_list")
-BuiltInFunction.is_function = BuiltInFunction("is_function")
-BuiltInFunction.append      = BuiltInFunction("append")
-BuiltInFunction.pop         = BuiltInFunction("pop")
-BuiltInFunction.extend      = BuiltInFunction("extend")
-BuiltInFunction.len         = BuiltInFunction("len")
-BuiltInFunction.run         = BuiltInFunction("run")
+    def execute_continueup(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+
+        if(not isinstance(value, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be a number",
+                exec_ctx
+            ))
+
+        # Aqui va el movimiento del servomotor
+        print("Arriba:")
+        print(value)
+        return RTResult().success(Number.null)
+    execute_continueup.arg_names = ["value"]
+
+    def execute_continuedown(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+
+        if(not isinstance(value, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be a number",
+                exec_ctx
+            ))
+
+        # Aqui va el movimiento del servomotor
+        print("Abajo:")
+        print(value)
+        return RTResult().success(Number.null)
+    execute_continuedown.arg_names = ["value"]
+
+    def execute_continueright(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+
+        if(not isinstance(value, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be a number",
+                exec_ctx
+            ))
+
+        # Aqui va el movimiento del servomotor
+        print("Derecha:")
+        print(value)
+        return RTResult().success(Number.null)
+    execute_continueright.arg_names = ["value"]
+    
+    def execute_continueleft(self, exec_ctx):
+        value = exec_ctx.symbol_table.get("value")
+
+        if(not isinstance(value, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be a number",
+                exec_ctx
+            ))
+
+        # Aqui va el movimiento del servomotor
+        print("Izquierda:")
+        print(value)
+        return RTResult().success(Number.null)
+    execute_continueleft.arg_names = ["value"]
+
+    def execute_pos(self, exec_ctx):
+        posX = exec_ctx.symbol_table.get("posX")
+        posY = exec_ctx.symbol_table.get("posY")
+
+        if(not isinstance(posX, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"First argument must be a number",
+                exec_ctx
+            ))
+        
+        if(not isinstance(posY, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"First argument must be a number",
+                exec_ctx
+            ))
+
+        # Aqui va el movimiento del servomotor
+        print("POS X:")
+        print(posX)
+        print("POS Y:")
+        print(posY)
+        return RTResult().success(Number.null)
+    execute_pos.arg_names = ["posX", "posY"]
+
+    def execute_posx(self, exec_ctx):
+        posX = exec_ctx.symbol_table.get("posX")
+
+        if(not isinstance(posX, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be a number",
+                exec_ctx
+            ))
+        # Aqui va el movimiento del servomotor
+        print("POS X:")
+        print(posX)
+        return RTResult().success(Number.null)
+    execute_posx.arg_names = ["posX"]
+
+    def execute_posy(self, exec_ctx):
+        posY = exec_ctx.symbol_table.get("posY")
+
+        if(not isinstance(posY, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be a number",
+                exec_ctx
+            ))
+        # Aqui va el movimiento del servomotor
+        print("POS Y:")
+        print(posY)
+        return RTResult().success(Number.null)
+    execute_posy.arg_names = ["posY"]
+
+    def execute_usecolor(self, exec_ctx):
+        color = exec_ctx.symbol_table.get("color")
+        if(not isinstance(color, Number)):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Argument must be an integer",
+                exec_ctx
+            ))
+        if(color.value == 1):
+            # Aqui va el movimiento del servomotor
+            return RTResult().success(Number.null)
+        elif(color.value == 2):
+            # Aqui va el movimiento del servomotor
+            return RTResult().success(Number.null)
+        elif(color.value == 3):
+            # Aqui va el movimiento del servomotor
+            return RTResult().success(Number.null)
+        else:
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                f"Color not defined (1, 2, 3)",
+                exec_ctx
+            ))
+    execute_usecolor.arg_names = ["color"]
+
+    def execute_down(self, exec_ctx):
+        print("Bajando...")
+        # Aqui va el movimiento del servomotor
+        return RTResult().success(Number.null)
+    execute_down.arg_names = []
+
+    def execute_up(self, exec_ctx):
+        print("Subiendo...")
+        # Aqui va el movimiento del servomotor
+        return RTResult().success(Number.null)
+    execute_up.arg_names = []
+
+    def execute_begin(self, exec_ctx):
+        print("Volviendo a origen...")
+        # Aqui va el movimiento del servomotor
+        return RTResult().success(Number.null)
+    execute_begin.arg_names = []
+
+BuiltInFunction.print           = BuiltInFunction("print")
+BuiltInFunction.print_ret       = BuiltInFunction("print_ret")
+BuiltInFunction.input           = BuiltInFunction("input")
+BuiltInFunction.input_int       = BuiltInFunction("input_int")
+BuiltInFunction.clear           = BuiltInFunction("clear")
+BuiltInFunction.is_number       = BuiltInFunction("is_number")
+BuiltInFunction.is_string       = BuiltInFunction("is_string")
+BuiltInFunction.is_list         = BuiltInFunction("is_list")
+BuiltInFunction.is_function     = BuiltInFunction("is_function")
+BuiltInFunction.append          = BuiltInFunction("append")
+BuiltInFunction.pop             = BuiltInFunction("pop")
+BuiltInFunction.extend          = BuiltInFunction("extend")
+BuiltInFunction.len             = BuiltInFunction("len")
+BuiltInFunction.run             = BuiltInFunction("run")
+BuiltInFunction.continueup      = BuiltInFunction("continueup")
+BuiltInFunction.continuedown    = BuiltInFunction("continuedown")
+BuiltInFunction.continueright   = BuiltInFunction("continueright")
+BuiltInFunction.continueleft    = BuiltInFunction("continueleft")
+BuiltInFunction.pos             = BuiltInFunction("pos")
+BuiltInFunction.posx            = BuiltInFunction("posx")
+BuiltInFunction.posy            = BuiltInFunction("posy")
+BuiltInFunction.usecolor        = BuiltInFunction("usecolor")
+BuiltInFunction.down            = BuiltInFunction("down")
+BuiltInFunction.up              = BuiltInFunction("up")
+BuiltInFunction.begin           = BuiltInFunction("begin")
+
 
 ##############################################
 #                   CONTEXT                  #
@@ -2178,7 +2358,17 @@ global_symbol_table.set("POP", BuiltInFunction.pop)
 global_symbol_table.set("EXTEND", BuiltInFunction.extend)
 global_symbol_table.set("LEN", BuiltInFunction.len)
 global_symbol_table.set("RUN", BuiltInFunction.run)
-
+global_symbol_table.set("CONTINUEUP", BuiltInFunction.continueup)
+global_symbol_table.set("CONTINUEDOWN", BuiltInFunction.continuedown)
+global_symbol_table.set("CONTINUERIGHT", BuiltInFunction.continueright)
+global_symbol_table.set("CONTINUELEFT", BuiltInFunction.continueleft)
+global_symbol_table.set("POS", BuiltInFunction.pos)
+global_symbol_table.set("POSX", BuiltInFunction.posx)
+global_symbol_table.set("POSY", BuiltInFunction.posy)
+global_symbol_table.set("USECOLOR", BuiltInFunction.usecolor)
+global_symbol_table.set("DOWN", BuiltInFunction.down)
+global_symbol_table.set("UP", BuiltInFunction.up)
+global_symbol_table.set("BEGIN", BuiltInFunction.begin)
 
 def run(fn, text):
     # GENERATE TOKENS
