@@ -4,7 +4,8 @@
 from PyQt5.QtWidgets import * 
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
-from PyQt5.Qsci import * 
+from PyQt5.Qsci import *
+import basic
  
 #                ______________________________ 
 #_______________/ CLASS MAIN WINDOW 
@@ -70,9 +71,10 @@ class Ui_MainWindow(object):
         self.actionSave_as.setText("Save As...") 
         self.menuFile.addAction(self.actionSave_as) 
  
-        self.actionCompile = QAction(mainWindow)  #Action Compile 
+        self.actionCompile = QAction(mainWindow, triggered = self.Compile)  #Action Compile 
         self.actionCompile.setText("Compile") 
-        self.menuRun.addAction(self.actionCompile) 
+        self.menuRun.addAction(self.actionCompile)
+        
  
         self.actionPreferences = QAction(mainWindow)  #Action Preferences 
         self.actionPreferences.setText("Preferences") 
@@ -86,9 +88,10 @@ class Ui_MainWindow(object):
         self.actionWiki.setText("Wiki") 
         self.menuHelp.addAction(self.actionWiki) 
  
-        self.actionBuild = QAction(mainWindow)    #Action Compile and Run 
+        self.actionBuild = QAction(mainWindow, triggered = self.Compile_Run)    #Action Compile and Run 
         self.actionBuild.setText("Compile and Run") 
         self.menuRun.addAction(self.actionBuild) 
+
  
         self.actionExit = QAction(mainWindow) #Action Exit 
         self.actionExit.setText("Exit") 
@@ -112,9 +115,9 @@ class Ui_MainWindow(object):
         #self.groupBox.setStyleSheet("background-color : white") 
  
         self.codeText = QPlainTextEdit(self.groupBox) #Code Text 
-        codeEditor = CodeEditor(self.codeText) 
+        self.codeEditor = CodeEditor(self.codeText) 
         self.codeText.setGeometry(QRect(5, 20, 840 ,641)) 
-        codeEditor.setGeometry(QRect(0, 0, 840 ,641)) 
+        self.codeEditor.setGeometry(QRect(0, 0, 840 ,641)) 
          
          
         self.explorerBox = QGroupBox(self.centralWidget)  #Explorer Group Box 
@@ -136,13 +139,44 @@ class Ui_MainWindow(object):
         self.tabWidget.setCurrentIndex(0) 
  
         self.Errors_TAB = QWidget()   #Errors Tab 
-        self.tabWidget.addTab(self.Errors_TAB, "Errors") 
-         
+        self.tabWidget.addTab(self.Errors_TAB, "Errors")
+        self.error_Text = QPlainTextEdit(self.Errors_TAB) 
+        self.error_Text.setReadOnly(True)
+        self.error_Text.setStyleSheet("font-family: Courier")
+        self.error_Text.setGeometry(QRect(0, 0, windowX - 6 , 163))
+
         self.Output_TAB = QWidget()   #Output Tab 
         self.tabWidget.addTab(self.Output_TAB, "Output") 
+        self.output_Text = QPlainTextEdit(self.Output_TAB)
+        self.output_Text.setReadOnly(True)
+        self.output_Text.setStyleSheet("font-family: Courier")
+        self.output_Text.setGeometry(QRect(0, 0, windowX - 6 , 163))
+
  
-         
-        QMetaObject.connectSlotsByName(mainWindow) 
+        QMetaObject.connectSlotsByName(mainWindow)
+
+    def Compile(self):
+        self.compile_Text = self.codeEditor.toPlainText()
+        result, error = basic.run('<stdin>', self.compile_Text)
+        self.error_Text.clear()
+        self.output_Text.clear()
+        if(error):
+            self.error_Text.insertPlainText(error.as_string())
+        else:
+            self.error_Text.insertPlainText("No errors found")
+        #
+    def Compile_Run(self):
+        self.compile_Text = self.codeEditor.toPlainText()
+        result, error = basic.run('<stdin>', self.compile_Text)
+        self.error_Text.clear()
+        self.output_Text.clear()
+        if(error):   
+            self.error_Text.insertPlainText(error.as_string())
+        elif(result):
+            if(len(result.elements) == 1):
+                self.output_Text.insertPlainText(repr(result.elements[0]))
+            else:
+                self.output_Text.insertPlainText(repr(result))
          
 class CodeEditor(QPlainTextEdit): 
     def __init__(self, parent=None): 
