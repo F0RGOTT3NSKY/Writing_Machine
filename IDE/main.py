@@ -169,7 +169,7 @@ class Ui_MainWindow(object):
     
     def open_new_file(self):
         self.dir_path, filter_type = QFileDialog.getOpenFileName(self.centralWidget, "Open new file", "", "All files (*)")
-        if self.file_path:
+        if self.dir_path:
             with open(self.dir_path, "r") as f:
                 file_contents = f.read()
                 self.groupBox.setTitle(self.dir_path)
@@ -188,9 +188,9 @@ class Ui_MainWindow(object):
                 self.invalid_path_alert_message()
                 return False
         file_contents = self.scrollable_text_area.toPlainText()
-        with open(self.file_path, "w") as f:
+        with open(self.dir_path, "w") as f:
             f.write(file_contents)
-        self.title.setText(self.file_path)
+        self.title.setText(self.dir_path)
     
     def closeEvent(self, event):
         messageBox = QMessageBox()
