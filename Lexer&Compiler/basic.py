@@ -569,7 +569,7 @@ class Parser:
         if(not res.error and self.current_tok.type != TT_EOF):
             return res.failure(IllegalSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected '+', '-', '*', '/', '^', '==', '!=', '<', '>', <=', '>=', 'AND' or 'OR'"
+                "Token cannot appear after previous tokens"
             ))
         return res
 
@@ -705,7 +705,7 @@ class Parser:
         if(res.error):
             return res.failure(IllegalSyntaxError(
                 self.current_tok.pos_start, self.current_tok.pos_end,
-                "Expected int, float, identifier '+', '-', '(', '[' or 'NOT'"
+                "Expected int, float, identifier, '+', '-', '(', '[', 'IF', 'FOR', 'WHILE', 'PARA' or 'NOT'"
             ))
         
         return res.success(node)
@@ -908,13 +908,13 @@ class Parser:
                 if(res.error): return res
                 else_case = (statements, True)
 
-                if(self.current_tok.matches(TT_KEYWORD, 'END')):
+                if(self.current_tok.matches(TT_KEYWORD, 'FIN')):
                     res.register_advancement()
                     self.advance()
                 else:
                     return res.failure(IllegalSyntaxError(
                         self.current_tok.pos_start, self.current_tok.pos_end,
-                        "Expected 'END'"
+                        "Expected 'FIN'"
                     ))
             else:
                 expr = res.register(self.statement())
@@ -971,7 +971,7 @@ class Parser:
             if(res.error): return res
             cases.append((condition, statements, True))
 
-            if(self.current_tok.matches(TT_KEYWORD, 'END')):
+            if(self.current_tok.matches(TT_KEYWORD, 'FIN')):
                 res.register_advancement()
                 self.advance()
             else:
@@ -1062,10 +1062,10 @@ class Parser:
             body = res.register(self.statements())
             if(res.error): return res
 
-            if(not self.current_tok.matches(TT_KEYWORD, 'END')):
+            if(not self.current_tok.matches(TT_KEYWORD, 'FIN')):
                 return res.failure(IllegalSyntaxError(
                     self.current_tok.pos_start, self.current_tok.pos_end,
-                    f"Expected 'END'"
+                    f"Expected 'FIN'"
                 ))
             
             res.register_advancement()
@@ -1109,10 +1109,10 @@ class Parser:
             body = res.register(self.statements())
             if(res.error): return res
 
-            if(not self.current_tok.matches(TT_KEYWORD, 'END')):
+            if(not self.current_tok.matches(TT_KEYWORD, 'FIN')):
                 return res.failure(IllegalSyntaxError(
                     self.current_tok.pos_start, self.current_tok.pos_end,
-                    f"Expected 'END'"
+                    f"Expected 'FIN'"
                 ))
             
             res.register_advancement()
@@ -2211,7 +2211,7 @@ class Interpreter:
 
         if(node.else_case):
             expr, should_return_null = node.else_case
-            else_value = res.register(self.visit(expr, context))
+            expr_value = res.register(self.visit(expr, context))
             if(res.should_return()): return res
             return res.success(Number.null if should_return_null else expr_value)
         
