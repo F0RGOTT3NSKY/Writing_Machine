@@ -19,7 +19,6 @@ Una lista de las tecnologías usadas en el proyecto
 * [Qt Designer](https://build-system.fman.io/qt-designer-download)
 * [PyQt5](https://pypi.org/project/PyQt5/) | ``pip install PyQt5``
 * [fman build system](https://build-system.fman.io/) | ``pip install fbs``
-* [QScintilla](https://pypi.org/project/QScintilla/) | ``pip install QScintilla``
 ***
 ## Instalación
 Para obtener la extensión, clone el repositorio
