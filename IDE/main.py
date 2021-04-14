@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
 from PyQt5.Qsci import *
+from PyQt5 import *
 import basic
  
 #                ______________________________ 
@@ -30,8 +31,8 @@ class Ui_MainWindow(object):
         mainWindow.setFixedSize(windowX, windowY) 
         mainWindow.setWindowTitle("Wrinting Machine") 
         #mainWindow.setStyleSheet("background-color : white") 
-        dir_path = r'C:\GitHub' 
- 
+        self.dir_path = r'C:\GitHub'
+         
         #           _____________________________ 
         #__________/ WINDOW OBJECTS 
          
@@ -111,7 +112,7 @@ class Ui_MainWindow(object):
          
         self.groupBox = QGroupBox(self.centralWidget) #Code Group Box 
         self.groupBox.setGeometry(QRect(5, 5, 850, 670)) 
-        self.groupBox.setTitle("GroupBox") 
+        self.groupBox.setTitle("Untitled File") 
         #self.groupBox.setStyleSheet("background-color : white") 
  
         self.codeText = QPlainTextEdit(self.groupBox) #Code Text 
@@ -126,12 +127,12 @@ class Ui_MainWindow(object):
         #self.explorerBox.setStyleSheet("background-color : white") 
  
         self.model = QFileSystemModel(mainWindow) 
-        self.model.setRootPath(dir_path) 
+        self.model.setRootPath(self.dir_path) 
  
         self.treeView = QTreeView(self.explorerBox)   #File Tree View 
         self.treeView.setGeometry(QRect(5, 20, 325, 641)) 
         self.treeView.setModel(self.model) 
-        self.treeView.setRootIndex(self.model.index(dir_path)) 
+        self.treeView.setRootIndex(self.model.index(self.dir_path)) 
         self.treeView.setColumnWidth(0, 325) 
  
         self.tabWidget = QTabWidget(self.centralWidget)   #Tab Widget 
@@ -154,7 +155,66 @@ class Ui_MainWindow(object):
 
  
         QMetaObject.connectSlotsByName(mainWindow)
-
+        #           _____________________________ 
+        #__________/ SHORTCUTS
+        
+        self.open_new_file_shortcut = QShortcut(QKeySequence('Ctrl+O'), self.centralWidget) #Open New File
+        self.open_new_file_shortcut.activated.connect(self.open_new_file)
+        
+        self.save_current_file_shortcut = QShortcut(QKeySequence('Ctrl+S'), self.centralWidget)   #Save File
+        self.save_current_file_shortcut.activated.connect(self.save_current_file)
+        
+    #           _____________________________ 
+    #__________/ OPEN NEW FILE SHORTCUT FUNCTION
+    
+    def open_new_file(self):
+        self.dir_path, filter_type = QFileDialog.getOpenFileName(self.centralWidget, "Open new file", "", "All files (*)")
+        if self.file_path:
+            with open(self.dir_path, "r") as f:
+                file_contents = f.read()
+                self.groupBox.setTitle(self.dir_path)
+                self.codeEditor.insertPlainText(file_contents)
+        else:
+            self.invalid_path_alert_message()
+    #           _____________________________ 
+    #__________/ SAVE FILE SHORTCUT FUNCTION
+    
+    def save_current_file(self):
+        if not self.file_path:
+            new_file_path, filter_type = QFileDialog.getSaveFileName(self, "Save this file as...", "", "All files (*)")
+            if new_file_path:
+                self.file_path = new_file_path
+            else:
+                self.invalid_path_alert_message()
+                return False
+        file_contents = self.scrollable_text_area.toPlainText()
+        with open(self.file_path, "w") as f:
+            f.write(file_contents)
+        self.title.setText(self.file_path)
+    
+    def closeEvent(self, event):
+        messageBox = QMessageBox()
+        title = "Quit Application?"
+        message = "WARNING !!\n\nIf you quit without saving, any changes made to the file will be lost.\n\nSave file before quitting?"
+       
+        reply = messageBox.question(self, title, message, messageBox.Yes | messageBox.No |
+                messageBox.Cancel, messageBox.Cancel)
+        if reply == messageBox.Yes:
+            return_value = self.save_current_file()
+            if return_value == False:
+                event.ignore()
+        elif reply == messageBox.No:
+            event.accept()
+        else:
+            event.ignore()
+    def invalid_path_alert_message(self):
+        messageBox = QMessageBox()
+        messageBox.setWindowTitle("Invalid file")
+        messageBox.setText("Selected filename or path is not valid. Please select a valid file.")
+        messageBox.exec()
+    #           _____________________________ 
+    #__________/ COMPILE FUNCTION
+    
     def Compile(self):
         self.compile_Text = self.codeEditor.toPlainText()
         result, error = basic.run('<stdin>', self.compile_Text)
@@ -164,7 +224,9 @@ class Ui_MainWindow(object):
             self.error_Text.insertPlainText(error.as_string())
         else:
             self.error_Text.insertPlainText("No errors found")
-        #
+    #           _____________________________ 
+    #__________/ COMPILE AND RUN FUNCTION
+    
     def Compile_Run(self):
         self.compile_Text = self.codeEditor.toPlainText()
         result, error = basic.run('<stdin>', self.compile_Text)
@@ -177,7 +239,10 @@ class Ui_MainWindow(object):
                 self.output_Text.insertPlainText(repr(result.elements[0]))
             else:
                 self.output_Text.insertPlainText(repr(result))
-         
+    
+#           _____________________________ 
+#__________/ CODE EDITOR
+
 class CodeEditor(QPlainTextEdit): 
     def __init__(self, parent=None): 
         QPlainTextEdit.__init__(self, parent) 
