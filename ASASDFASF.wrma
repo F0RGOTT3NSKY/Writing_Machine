@@ -1,4 +1,4 @@
-# This is a very useful piece of software
+# This is a very useful piece of software so yeah THIS IS F
 
 PARA oopify(prefix) -> prefix + "oop"
 
@@ -13,11 +13,3 @@ PARA join(elements, separator)
 
     RETURN result;
 FIN
-
-PARA map(elements, func)
-    DEF new_elements = [];
-
-    FOR i = 0 TO LEN(elements) THEN
-        APPEND(new_elements, func(elements/i));
-    FIN
-#This is a test 

@@ -10,6 +10,7 @@ import basic
  
 #                ______________________________ 
 #_______________/ CLASS MAIN WINDOW 
+
 class LineNumberArea(QWidget): 
     def __init__(self, editor): 
         QWidget.__init__(self, parent=editor) 
@@ -21,7 +22,7 @@ class LineNumberArea(QWidget):
     def paintEvent(self, event): 
         self.codeEditor.lineNumberAreaPaintEvent(event) 
          
-class Ui_MainWindow(object): 
+class Ui_MainWindow(QMainWindow): 
     def setupUi(self, mainWindow): 
         #           _____________________________ 
         #__________/ WINDOW CONSTRUCTOR 
@@ -32,6 +33,7 @@ class Ui_MainWindow(object):
         mainWindow.setWindowTitle("Wrinting Machine") 
         #mainWindow.setStyleSheet("background-color : white") 
         self.dir_path = r'C:\GitHub'
+        self.cur_path = None
          
         #           _____________________________ 
         #__________/ WINDOW OBJECTS 
@@ -60,15 +62,15 @@ class Ui_MainWindow(object):
         self.actionNew_File.setText("New File") 
         self.menuFile.addAction(self.actionNew_File) 
          
-        self.actionOpen = QAction(mainWindow) #Action Open  
+        self.actionOpen = QAction(mainWindow, triggered = self.open_new_file) #Action Open  
         self.actionOpen.setText("Open") 
         self.menuFile.addAction(self.actionOpen) 
          
-        self.actionSave = QAction(mainWindow) #Action Save 
+        self.actionSave = QAction(mainWindow, triggered = self.save_current_file) #Action Save 
         self.actionSave.setText("Save") 
         self.menuFile.addAction(self.actionSave) 
  
-        self.actionSave_as = QAction(mainWindow)  #Action Save as 
+        self.actionSave_as = QAction(mainWindow, triggered = self.save_current_file_as)  #Action Save as 
         self.actionSave_as.setText("Save As...") 
         self.menuFile.addAction(self.actionSave_as) 
  
@@ -153,7 +155,12 @@ class Ui_MainWindow(object):
         self.output_Text.setStyleSheet("font-family: Courier")
         self.output_Text.setGeometry(QRect(0, 0, windowX - 6 , 163))
 
- 
+        self.Terminal_TAB = QWidget()
+        self.tabWidget.addTab(self.Terminal_TAB, "Terminal")
+        self.terminal_Console = QPlainTextEdit(self.Terminal_TAB)
+        self.terminal_Console.setStyleSheet("font-family: Courier")
+        self.terminal_Console.setGeometry(QRect(0, 0, windowX - 6 , 163))
+    
         QMetaObject.connectSlotsByName(mainWindow)
         #           _____________________________ 
         #__________/ SHORTCUTS
@@ -163,42 +170,77 @@ class Ui_MainWindow(object):
         
         self.save_current_file_shortcut = QShortcut(QKeySequence('Ctrl+S'), self.centralWidget)   #Save File
         self.save_current_file_shortcut.activated.connect(self.save_current_file)
-        
+
+        self.compile_and_run_shortcut = QShortcut(QKeySequence('F5'), self.centralWidget) #Compile and Run
+        self.compile_and_run_shortcut.activated.connect(self.Compile_Run)
+
+        self.compile_shortcut = QShortcut(QKeySequence('Ctrl+F5'), self.centralWidget) #Compile
+        self.compile_shortcut.activated.connect(self.Compile)
+ 
+    #           _____________________________ 
+    #__________/ NEW FILE SHORTCUT FUNCTION
+
+    def new_file(self):
+        if cur_path:
+            messageBox = QMessageBox()
+            title = ""
+            message = ""
+        self.cur_path = None
+        self.codeEditor.clear()
+        self.groupBox.setTitle("Untitled File")
+
     #           _____________________________ 
     #__________/ OPEN NEW FILE SHORTCUT FUNCTION
-    
+
     def open_new_file(self):
-        self.dir_path, filter_type = QFileDialog.getOpenFileName(self.centralWidget, "Open new file", "", "All files (*)")
+        self.dir_path, filter_type = QFileDialog.getOpenFileName(self.centralWidget, "Open new file", "", "Writing Machine Code (*.wrma)")
         if self.dir_path:
             with open(self.dir_path, "r") as f:
                 file_contents = f.read()
                 self.groupBox.setTitle(self.dir_path)
+                self.codeEditor.clear()
                 self.codeEditor.insertPlainText(file_contents)
+                self.cur_path = self.dir_path
         else:
             self.invalid_path_alert_message()
+
     #           _____________________________ 
     #__________/ SAVE FILE SHORTCUT FUNCTION
     
     def save_current_file(self):
-        if not self.file_path:
-            new_file_path, filter_type = QFileDialog.getSaveFileName(self, "Save this file as...", "", "All files (*)")
+        if not self.cur_path:
+            new_file_path, filter_type = QFileDialog.getSaveFileName(self.centralWidget, "Save this file as...", "", "Writing Machine Code (*.wrma)")
             if new_file_path:
-                self.file_path = new_file_path
+                self.cur_path = new_file_path
             else:
                 self.invalid_path_alert_message()
                 return False
-        file_contents = self.scrollable_text_area.toPlainText()
-        with open(self.dir_path, "w") as f:
+        file_contents = self.codeEditor.toPlainText()
+        with open(self.cur_path, "w") as f:
             f.write(file_contents)
-        self.title.setText(self.dir_path)
-    
+        self.groupBox.setTitle(self.cur_path)
+        #self.title.setText(self.dir_path)
+
+    #           _____________________________ 
+    #__________/ SAVE AS FILE SHORTCUT FUNCTION
+    def save_current_file_as(self):
+        new_file_path, filter_type = QFileDialog.getSaveFileName(self.centralWidget, "Save this file as...", "", "Writing Machine Code (*.wrma)")
+        if new_file_path:
+            self.cur_path = new_file_path
+        else:
+            self.invalid_path_alert_message()
+            return False
+        file_contents = self.codeEditor.toPlainText()
+        with open(self.cur_path, "w") as f:
+            f.write(file_contents)
+        self.groupBox.setTitle(self.cur_path)
+
+
     def closeEvent(self, event):
         messageBox = QMessageBox()
         title = "Quit Application?"
-        message = "WARNING !!\n\nIf you quit without saving, any changes made to the file will be lost.\n\nSave file before quitting?"
-       
-        reply = messageBox.question(self, title, message, messageBox.Yes | messageBox.No |
-                messageBox.Cancel, messageBox.Cancel)
+        message = "WARNING !!\n\n If you quit without saving, any changes made to the file will be lost.\n\n Save file before quitting?"
+        reply = messageBox.question(self, title, message, messageBox.Yes | messageBox.No | messageBox.Cancel, messageBox.Cancel)
         if reply == messageBox.Yes:
             return_value = self.save_current_file()
             if return_value == False:
@@ -207,6 +249,7 @@ class Ui_MainWindow(object):
             event.accept()
         else:
             event.ignore()
+    
     def invalid_path_alert_message(self):
         messageBox = QMessageBox()
         messageBox.setWindowTitle("Invalid file")
@@ -224,22 +267,32 @@ class Ui_MainWindow(object):
             self.error_Text.insertPlainText(error.as_string())
         else:
             self.error_Text.insertPlainText("No errors found")
+        self.tabWidget.setCurrentIndex(0)
     #           _____________________________ 
     #__________/ COMPILE AND RUN FUNCTION
     
     def Compile_Run(self):
+        sys.stdout = open("test.txt", "w") 
         self.compile_Text = self.codeEditor.toPlainText()
         result, error = basic.run('<stdin>', self.compile_Text)
         self.error_Text.clear()
         self.output_Text.clear()
         if(error):   
             self.error_Text.insertPlainText(error.as_string())
-        elif(result):
+            self.tabWidget.setCurrentIndex(0)
+        else:
+            self.error_Text.insertPlainText("No errors found")
             if(len(result.elements) == 1):
                 self.output_Text.insertPlainText(repr(result.elements[0]))
             else:
                 self.output_Text.insertPlainText(repr(result))
-    
+            sys.stdout.close()
+            with open("test.txt", "r") as f:
+                file_contents = f.read()
+                self.terminal_Console.clear()
+                self.terminal_Console.insertPlainText(file_contents)
+                self.tabWidget.setCurrentIndex(2)
+                
 #           _____________________________ 
 #__________/ CODE EDITOR
 
