@@ -1,6 +1,7 @@
 # This is a very useful piece of software so yeah 
 
 PARA oopify(prefix) -> prefix + "oop"
+PRINT("hola mundo");
 
 PARA join(elements, separator)
     DEF result = "";

@@ -58,7 +58,7 @@ class Ui_MainWindow(QMainWindow):
         self.menuHelp.setTitle("Help") 
         self.menuBar.addAction(self.menuHelp.menuAction()) 
  
-        self.actionNew_File = QAction(mainWindow) #Action New File 
+        self.actionNew_File = QAction(mainWindow, triggered = self.new_file) #Action New File 
         self.actionNew_File.setText("New File") 
         self.menuFile.addAction(self.actionNew_File) 
          
@@ -181,14 +181,21 @@ class Ui_MainWindow(QMainWindow):
     #__________/ NEW FILE SHORTCUT FUNCTION
 
     def new_file(self):
-        if cur_path:
+        if self.cur_path or (self.codeEditor.blockCount != 1):
             messageBox = QMessageBox()
-            title = ""
-            message = ""
-        self.cur_path = None
-        self.codeEditor.clear()
-        self.groupBox.setTitle("Untitled File")
-
+            title = "Writing Machine IDE"
+            message = "Do you want to save changes to " + self.groupBox.title() + "?"
+            reply = messageBox.question(self, title, message, messageBox.Yes | messageBox.No | messageBox.Cancel, messageBox.Cancel)
+            if reply == messageBox.Yes:
+                self.save_current_file()
+                self.cur_path = None
+                self.codeEditor.clear()
+                self.groupBox.setTitle("Untitled File")
+            elif reply == messageBox.No:
+                self.cur_path = None
+                self.codeEditor.clear()
+                self.groupBox.setTitle("Untitled File")
+        
     #           _____________________________ 
     #__________/ OPEN NEW FILE SHORTCUT FUNCTION
 
@@ -219,7 +226,6 @@ class Ui_MainWindow(QMainWindow):
         with open(self.cur_path, "w") as f:
             f.write(file_contents)
         self.groupBox.setTitle(self.cur_path)
-        #self.title.setText(self.dir_path)
 
     #           _____________________________ 
     #__________/ SAVE AS FILE SHORTCUT FUNCTION
@@ -250,6 +256,9 @@ class Ui_MainWindow(QMainWindow):
         else:
             event.ignore()
     
+    #           _____________________________ 
+    #__________/ INVALID PATH FUNCTION
+
     def invalid_path_alert_message(self):
         messageBox = QMessageBox()
         messageBox.setWindowTitle("Invalid file")
