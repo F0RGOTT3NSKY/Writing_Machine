@@ -43,11 +43,36 @@ void move_right(int ms){
   stop_motors();
 }
 
+void light_red(){
+  digitalWrite(12,HIGH);
+  digitalWrite(11,LOW);
+  digitalWrite(13,LOW);
+}
+
+void light_blue(){
+  digitalWrite(11,HIGH);
+  digitalWrite(12,LOW);
+  digitalWrite(13,LOW);
+}
+
+void light_green(){
+  digitalWrite(13,HIGH);
+  digitalWrite(12,LOW);
+  digitalWrite(11,LOW);
+  if (pen = false){
+     pen = true;
+     pen_down();
+   }
+}
+
 void setup() {
   pinMode(2,OUTPUT);
   pinMode(3,OUTPUT);
   pinMode(4,OUTPUT);
   pinMode(5,OUTPUT);
+  pinMode(11,OUTPUT);
+  pinMode(12,OUTPUT);
+  pinMode(13,OUTPUT);
   servo.attach(6);
   Serial.begin(9600);
   stop_motors();
@@ -78,6 +103,15 @@ void loop() {
           pen = true;
           pen_down();
         }
+        break;
+      case 114: //red
+        light_red();
+        break; 
+      case 103: //green
+        light_green();
+        break; 
+      case 98: //blue
+        light_blue();
         break;
       default:
         // do nothing
