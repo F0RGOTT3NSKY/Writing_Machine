@@ -10,8 +10,7 @@ from os.path import splitext
 import basic
  
 #                ______________________________ 
-#_______________/ CLASS MAIN WINDOW 
-
+#_______________/ CLASS LINENUMBER
 class LineNumberArea(QWidget): 
     def __init__(self, editor): 
         QWidget.__init__(self, parent=editor) 
@@ -22,12 +21,12 @@ class LineNumberArea(QWidget):
  
     def paintEvent(self, event): 
         self.codeEditor.lineNumberAreaPaintEvent(event) 
-         
-class Ui_MainWindow(QMainWindow): 
-    def setupUi(self, mainWindow): 
-        #           _____________________________ 
-        #__________/ WINDOW CONSTRUCTOR 
-         
+#                ______________________________ 
+#_______________/ CLASS MAIN WINDOW    
+class Ui_MainWindow(QMainWindow):
+    #           _____________________________ 
+    #__________/ WINDOW CONSTRUCTOR
+    def setupUi(self, mainWindow):  
         windowX = 1200 
         windowY = 900 
         mainWindow.setFixedSize(windowX, windowY) 
@@ -50,10 +49,6 @@ class Ui_MainWindow(QMainWindow):
         self.menuRun = QMenu(self.menuBar)    #Menu Run 
         self.menuRun.setTitle("Run") 
         self.menuBar.addAction(self.menuRun.menuAction()) 
- 
-        self.menuOptions = QMenu(self.menuBar)    #Menu Options 
-        self.menuOptions.setTitle("Options") 
-        self.menuBar.addAction(self.menuOptions.menuAction()) 
          
         self.menuHelp = QMenu(self.menuBar)   #Menu Help 
         self.menuHelp.setTitle("Help") 
@@ -78,11 +73,6 @@ class Ui_MainWindow(QMainWindow):
         self.actionCompile = QAction(mainWindow, triggered = self.Compile)  #Action Compile 
         self.actionCompile.setText("Compile") 
         self.menuRun.addAction(self.actionCompile)
-        
- 
-        self.actionPreferences = QAction(mainWindow)  #Action Preferences 
-        self.actionPreferences.setText("Preferences") 
-        self.menuOptions.addAction(self.actionPreferences) 
  
         self.actionAbout = QAction(mainWindow)    #Action About 
         self.actionAbout.setText("About") 
@@ -97,7 +87,7 @@ class Ui_MainWindow(QMainWindow):
         self.menuRun.addAction(self.actionBuild) 
 
  
-        self.actionExit = QAction(mainWindow) #Action Exit 
+        self.actionExit = QAction(mainWindow, triggered = self.closeEvent) #Action Exit 
         self.actionExit.setText("Exit") 
         self.menuFile.addAction(self.actionExit) 
  
@@ -178,10 +168,8 @@ class Ui_MainWindow(QMainWindow):
 
         self.compile_shortcut = QShortcut(QKeySequence('Ctrl+F5'), self.centralWidget) #Compile
         self.compile_shortcut.activated.connect(self.Compile)
- 
     #           _____________________________ 
     #__________/ NEW FILE SHORTCUT FUNCTION
-
     def new_file(self):
         if self.cur_path or (self.codeEditor.blockCount != 1):
             messageBox = QMessageBox()
@@ -196,11 +184,9 @@ class Ui_MainWindow(QMainWindow):
             elif reply == messageBox.No:
                 self.cur_path = None
                 self.codeEditor.clear()
-                self.groupBox.setTitle("Untitled File")
-        
+                self.groupBox.setTitle("Untitled File")  
     #           _____________________________ 
     #__________/ OPEN NEW FILE SHORTCUT FUNCTION
-
     def open_new_file(self):
         self.dir_path, filter_type = QFileDialog.getOpenFileName(self.centralWidget, "Open new file", "", "Writing Machine Code (*.wrma)")
         if self.dir_path:
@@ -212,10 +198,8 @@ class Ui_MainWindow(QMainWindow):
                 self.cur_path = self.dir_path
         else:
             self.invalid_path_alert_message()
-
     #           _____________________________ 
-    #__________/ SAVE FILE SHORTCUT FUNCTION
-    
+    #__________/ SAVE FILE SHORTCUT FUNCTION 
     def save_current_file(self):
         if not self.cur_path:
             new_file_path, filter_type = QFileDialog.getSaveFileName(self.centralWidget, "Save this file as...", "", "Writing Machine Code (*.wrma)")
@@ -228,7 +212,6 @@ class Ui_MainWindow(QMainWindow):
         with open(self.cur_path, "w") as f:
             f.write(file_contents)
         self.groupBox.setTitle(self.cur_path)
-
     #           _____________________________ 
     #__________/ SAVE AS FILE SHORTCUT FUNCTION
     def save_current_file_as(self):
@@ -242,8 +225,8 @@ class Ui_MainWindow(QMainWindow):
         with open(self.cur_path, "w") as f:
             f.write(file_contents)
         self.groupBox.setTitle(self.cur_path)
-
-
+    #           _____________________________ 
+    #__________/ CLOSE EVENT FUNCTION
     def closeEvent(self, event):
         messageBox = QMessageBox()
         title = "Quit Application?"
@@ -257,10 +240,8 @@ class Ui_MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
-    
     #           _____________________________ 
     #__________/ INVALID PATH FUNCTION
-
     def invalid_path_alert_message(self):
         messageBox = QMessageBox()
         messageBox.setWindowTitle("Invalid file")
@@ -268,7 +249,6 @@ class Ui_MainWindow(QMainWindow):
         messageBox.exec()
     #           _____________________________ 
     #__________/ COMPILE FUNCTION
-    
     def Compile(self):
         self.compile_Text = self.codeEditor.toPlainText()
         result, error = basic.run('<stdin>', self.compile_Text)
@@ -280,10 +260,9 @@ class Ui_MainWindow(QMainWindow):
             self.error_Text.insertPlainText("No errors found")
         self.tabWidget.setCurrentIndex(0)
     #           _____________________________ 
-    #__________/ COMPILE AND RUN FUNCTION
-    
+    #__________/ COMPILE AND RUN FUNCTION 
     def Compile_Run(self):
-        sys.stdout = open("test.txt", "w") 
+        sys.stdout = open("log.txt", "w") 
         self.compile_Text = self.codeEditor.toPlainText()
         result, error = basic.run('<stdin>', self.compile_Text)
         self.error_Text.clear()
@@ -298,7 +277,7 @@ class Ui_MainWindow(QMainWindow):
             else:
                 self.output_Text.insertPlainText(repr(result))
             sys.stdout.close()
-            with open("test.txt", "r") as f:
+            with open("log.txt", "r") as f:
                 file_contents = f.read()
                 self.terminal_Console.clear()
                 self.terminal_Console.insertPlainText(file_contents)
@@ -319,10 +298,8 @@ class Ui_MainWindow(QMainWindow):
                 self.codeEditor.clear()
                 self.codeEditor.insertPlainText(file_contents)
                 self.cur_path = filePath
-
 #           _____________________________ 
 #__________/ CODE EDITOR
-
 class CodeEditor(QPlainTextEdit): 
     def __init__(self, parent=None): 
         QPlainTextEdit.__init__(self, parent) 
@@ -389,10 +366,8 @@ class CodeEditor(QPlainTextEdit):
             self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height()) 
         if rect.contains(self.viewport().rect()): 
             self.updateLineNumberAreaWidth(0) 
- 
 #                ______________________________ 
-#_______________/ START 
- 
+#_______________/ START  
 if __name__ == "__main__": 
     import sys 
     app = QApplication(sys.argv) 
