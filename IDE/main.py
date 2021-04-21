@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import * 
 from PyQt5.Qsci import *
 from PyQt5 import *
+from os.path import splitext
 import basic
  
 #                ______________________________ 
@@ -129,13 +130,14 @@ class Ui_MainWindow(QMainWindow):
         #self.explorerBox.setStyleSheet("background-color : white") 
  
         self.model = QFileSystemModel(mainWindow) 
-        self.model.setRootPath(self.dir_path) 
+        self.model.setRootPath(self.dir_path)
  
         self.treeView = QTreeView(self.explorerBox)   #File Tree View 
         self.treeView.setGeometry(QRect(5, 20, 325, 641)) 
         self.treeView.setModel(self.model) 
         self.treeView.setRootIndex(self.model.index(self.dir_path)) 
         self.treeView.setColumnWidth(0, 325) 
+        self.treeView.clicked.connect(self.on_treeView_clicked)
  
         self.tabWidget = QTabWidget(self.centralWidget)   #Tab Widget 
         self.tabWidget.setGeometry(QRect(1, 670, windowX, 189)) 
@@ -301,7 +303,23 @@ class Ui_MainWindow(QMainWindow):
                 self.terminal_Console.clear()
                 self.terminal_Console.insertPlainText(file_contents)
                 self.tabWidget.setCurrentIndex(2)
-                
+    #           _____________________________ 
+    #__________/ TREEVIEW CLICKED FUNCTION
+    @QtCore.pyqtSlot(QtCore.QModelIndex)
+    def on_treeView_clicked(self, index):
+        indexItem = self.model.index(index.row(), 0, index.parent())
+
+        fileName = self.model.fileName(indexItem)
+        filePath = self.model.filePath(indexItem)
+        fileName, extension = splitext(fileName)
+        if extension == ".wrma":
+            with open(filePath, "r") as f:
+                file_contents = f.read()
+                self.groupBox.setTitle(filePath)
+                self.codeEditor.clear()
+                self.codeEditor.insertPlainText(file_contents)
+                self.cur_path = filePath
+
 #           _____________________________ 
 #__________/ CODE EDITOR
 
