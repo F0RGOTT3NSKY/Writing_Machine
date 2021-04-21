@@ -1,15 +1,13 @@
 #include <Servo.h>
 
 Servo servo;
-bool pen = false;
 int resolution = 100; //resolution in ms
 
-void pen_down(){
-  servo.write(90);
-}
-
-void pen_up(){
+void no_color(){
   servo.write(0);
+  digitalWrite(12,LOW);
+  digitalWrite(11,LOW);
+  digitalWrite(13,LOW);
 }
 
 void stop_motors(){
@@ -44,25 +42,24 @@ void move_right(int ms){
 }
 
 void light_red(){
-  digitalWrite(12,HIGH);
+  servo.write(0);
   digitalWrite(11,LOW);
+  digitalWrite(12,HIGH);
   digitalWrite(13,LOW);
 }
 
 void light_blue(){
+  servo.write(0);
   digitalWrite(11,HIGH);
   digitalWrite(12,LOW);
   digitalWrite(13,LOW);
 }
 
 void light_green(){
-  digitalWrite(13,HIGH);
-  digitalWrite(12,LOW);
+  servo.write(90);
   digitalWrite(11,LOW);
-  if (pen = false){
-     pen = true;
-     pen_down();
-   }
+  digitalWrite(12,LOW);
+  digitalWrite(13,HIGH);
 }
 
 void setup() {
@@ -76,7 +73,7 @@ void setup() {
   servo.attach(6);
   Serial.begin(9600);
   stop_motors();
-  pen_up();
+  no_color();
 }
 
 void loop() {
@@ -96,25 +93,19 @@ void loop() {
         move_right(resolution);
         break;
       case 32:
-        if (pen){
-          pen = false;
-          pen_up();
-        } else {
-          pen = true;
-          pen_down();
-        }
+        no_color();
         break;
-      case 114: //red
+      case 114:
         light_red();
         break; 
-      case 103: //green
+      case 103:
         light_green();
         break; 
-      case 98: //blue
+      case 98:
         light_blue();
         break;
       default:
-        // do nothing
+        Serial.print(incomingByte);
         break;
     }
   }
