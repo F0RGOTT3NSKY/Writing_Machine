@@ -18,7 +18,6 @@ Una lista de las tecnologías usadas en el proyecto
 * [Python 3.9.2](https://www.python.org/downloads/)
 * [Qt Designer](https://build-system.fman.io/qt-designer-download)
 * [PyQt5](https://pypi.org/project/PyQt5/) | ``pip install PyQt5``
-* [fman build system](https://build-system.fman.io/) | ``pip install fbs``
 ***
 ## Instalación
 Para obtener la extensión, clone el repositorio
