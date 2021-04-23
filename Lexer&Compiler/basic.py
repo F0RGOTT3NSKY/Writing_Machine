@@ -19,6 +19,10 @@ LETTERS = string.ascii_letters + "@" + "&" + "_"
 LETTERS_DIGITS = LETTERS + DIGITS
 #arduino = serial.Serial(port='COM5', baudrate=9600, timeout=0.1)
 #time.sleep(2)
+global_posX = 0
+global_posY = 0
+has_main = False
+has_var = False
 
 #######################################
 # ERRORS
@@ -2135,12 +2139,23 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
+        
+        value = int(str(value))
+        global global_posY
+        if global_posY + value > 200:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posY += value
 
         # Aqui va el movimiento del servomotor
         #for x in range(int(str(value))):
         #    arduino.write(bytes('w', 'ascii'))
-        print("Arriba:")
-        print(value)
         return RTResult().success(Number.null)
 
     execute_continueup.arg_names = ["value"]
@@ -2154,12 +2169,21 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-
+        value = int(str(value))
+        global global_posY
+        if global_posY - value < 0:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posY -= value
         # Aqui va el movimiento del servomotor
         #for x in range(int(str(value))):
         #    arduino.write(bytes('s', 'ascii'))
-        print("Abajo:")
-        print(value)
         return RTResult().success(Number.null)
 
     execute_continuedown.arg_names = ["value"]
@@ -2173,7 +2197,18 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-
+        value = int(str(value))
+        global global_posX
+        if global_posX + value > 200:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posX += value
         # Aqui va el movimiento del servomotor
         #for x in range(int(str(value))):
         #    arduino.write(bytes('d', 'ascii'))
@@ -2192,6 +2227,19 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
+        
+        value = int(str(value))
+        global global_posX
+        if global_posX - value < 0:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posX -= value
 
         # Aqui va el movimiento del servomotor
         #for x in range(int(str(value))):
@@ -2227,10 +2275,29 @@ class BuiltInFunction(BaseFunction):
             )
 
         # Aqui va el movimiento del servomotor
-        print("POS X:")
-        print(posX)
-        print("POS Y:")
-        print(posY)
+        posX = int(str(posX))
+        posY = int(str(posY))
+        global global_posX
+        global global_posY
+
+        # X COORDINATE
+        if global_posX >= posX:
+            movement = global_posX - posX
+            # Aqui va el movmiento del servomotor hacia la izquierda
+        if global_posX <= posX:
+            movement = posX - global_posX
+            # Aqui va el movimiento del servomotor hacia la derecha
+        global_posX = posX
+
+        # Y COORDINATE
+        if global_posY >= posY:
+            movement = global_posY - posY
+            # Aqui va el movmiento del servomotor hacia abajo
+        if global_posY <= posY:
+            movement = posY - global_posY
+            # Aqui va el movmiento del servomotor hacia arriba
+        global_posY = posY
+
         return RTResult().success(Number.null)
 
     execute_pos.arg_names = ["posX", "posY"]
@@ -2244,9 +2311,17 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-        # Aqui va el movimiento del servomotor
-        print("POS X:")
-        print(posX)
+        posX = int(str(posX))
+        global global_posX
+
+        if global_posX >= posX:
+            movement = global_posX - posX
+            # Aqui va el movmiento del servomotor hacia la izquierda
+        if global_posX <= posX:
+            movement = posX - global_posX
+            # Aqui va el movimiento del servomotor hacia la derecha
+        global_posX = posX
+
         return RTResult().success(Number.null)
 
     execute_posx.arg_names = ["posX"]
@@ -2260,9 +2335,16 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-        # Aqui va el movimiento del servomotor
-        print("POS Y:")
-        print(posY)
+        posY = int(str(posY))
+        global global_posY
+
+        if global_posY >= posY:
+            movement = global_posY - posY
+            # Aqui va el movmiento del servomotor hacia abajo
+        if global_posY <= posY:
+            movement = posY - global_posY
+            # Aqui va el movmiento del servomotor hacia arriba
+        global_posY = posY
         return RTResult().success(Number.null)
 
     execute_posy.arg_names = ["posY"]
@@ -2320,7 +2402,11 @@ class BuiltInFunction(BaseFunction):
 
     def execute_begin(self, exec_ctx):
         print("Volviendo a origen...")
+        global global_posX
+        global global_posY
         # Aqui va el movimiento del servomotor
+        # Si o si, para la izquierda usando global_posX
+        # Y lo mismo para abajo usando global_posY
         return RTResult().success(Number.null)
 
     execute_begin.arg_names = []
