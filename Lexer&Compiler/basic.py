@@ -7,6 +7,8 @@ from strings_with_arrows import *
 import string
 import os
 import math
+import time
+#import serial
 
 #######################################
 # CONSTANTS
@@ -15,6 +17,8 @@ import math
 DIGITS = "0123456789"
 LETTERS = string.ascii_letters + "@" + "&" + "_"
 LETTERS_DIGITS = LETTERS + DIGITS
+#arduino = serial.Serial(port='COM5', baudrate=9600, timeout=0.1)
+#time.sleep(2)
 
 #######################################
 # ERRORS
@@ -2133,6 +2137,8 @@ class BuiltInFunction(BaseFunction):
             )
 
         # Aqui va el movimiento del servomotor
+        #for x in range(int(str(value))):
+        #    arduino.write(bytes('w', 'ascii'))
         print("Arriba:")
         print(value)
         return RTResult().success(Number.null)
@@ -2150,6 +2156,8 @@ class BuiltInFunction(BaseFunction):
             )
 
         # Aqui va el movimiento del servomotor
+        #for x in range(int(str(value))):
+        #    arduino.write(bytes('s', 'ascii'))
         print("Abajo:")
         print(value)
         return RTResult().success(Number.null)
@@ -2167,6 +2175,8 @@ class BuiltInFunction(BaseFunction):
             )
 
         # Aqui va el movimiento del servomotor
+        #for x in range(int(str(value))):
+        #    arduino.write(bytes('d', 'ascii'))
         print("Derecha:")
         print(value)
         return RTResult().success(Number.null)
@@ -2184,6 +2194,8 @@ class BuiltInFunction(BaseFunction):
             )
 
         # Aqui va el movimiento del servomotor
+        #for x in range(int(str(value))):
+        #    arduino.write(bytes('a', 'ascii'))
         print("Izquierda:")
         print(value)
         return RTResult().success(Number.null)
@@ -2268,12 +2280,15 @@ class BuiltInFunction(BaseFunction):
             )
         if color.value == 1:
             # Aqui va el movimiento del servomotor
+            #arduino.write(bytes('r', 'ascii'))
             return RTResult().success(Number.null)
         elif color.value == 2:
             # Aqui va el movimiento del servomotor
+            #arduino.write(bytes('b', 'ascii'))
             return RTResult().success(Number.null)
         elif color.value == 3:
             # Aqui va el movimiento del servomotor
+            #arduino.write(bytes('g', 'ascii'))
             return RTResult().success(Number.null)
         else:
             return RTResult().failure(
@@ -2290,6 +2305,7 @@ class BuiltInFunction(BaseFunction):
     def execute_down(self, exec_ctx):
         print("Bajando...")
         # Aqui va el movimiento del servomotor
+        #arduino.write(bytes(' ', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_down.arg_names = []
@@ -2297,6 +2313,7 @@ class BuiltInFunction(BaseFunction):
     def execute_up(self, exec_ctx):
         print("Subiendo...")
         # Aqui va el movimiento del servomotor
+        #arduino.write(bytes(' ', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_up.arg_names = []
