@@ -27,9 +27,9 @@ class Ui_MainWindow(QMainWindow):
     #           _____________________________ 
     #__________/ WINDOW CONSTRUCTOR
     def setupUi(self, mainWindow):  
-        windowX = 1200 
-        windowY = 900 
-        mainWindow.setFixedSize(windowX, windowY) 
+        windowX = 1366 
+        windowY = 768 
+        mainWindow.setGeometry(0, 0, windowX, windowY) 
         mainWindow.setWindowTitle("Wrinting Machine") 
         #mainWindow.setStyleSheet("background-color : white") 
         self.dir_path = r'C:\GitHub'
@@ -104,18 +104,18 @@ class Ui_MainWindow(QMainWindow):
         mainWindow.setCentralWidget(self.centralWidget) 
          
         self.groupBox = QGroupBox(self.centralWidget) #Code Group Box 
-        self.groupBox.setGeometry(QRect(5, 5, 850, 670)) 
+        self.groupBox.setGeometry(QRect(5, 5, round((windowX/100)*70.84) , round((windowY/100)*74.45))) 
         self.groupBox.setTitle("Untitled File") 
         #self.groupBox.setStyleSheet("background-color : white") 
  
         self.codeText = QPlainTextEdit(self.groupBox) #Code Text 
         self.codeEditor = CodeEditor(self.codeText) 
-        self.codeText.setGeometry(QRect(5, 20, 840 ,641)) 
-        self.codeEditor.setGeometry(QRect(0, 0, 840 ,641)) 
+        self.codeText.setGeometry(QRect(5, 20, round((windowX/100)*70), round((windowY/100)*71.13))) 
+        self.codeEditor.setGeometry(QRect(0, 0, round((windowX/100)*70) , round((windowY/100)*71.13))) 
          
          
         self.explorerBox = QGroupBox(self.centralWidget)  #Explorer Group Box 
-        self.explorerBox.setGeometry(QRect(860, 5 , 335, 670)) 
+        self.explorerBox.setGeometry(QRect(round((windowX/100)*71.67), 5 , round((windowX/100)*27.91), round((windowY/100)*74.45))) 
         self.explorerBox.setTitle("File Explorer") 
         #self.explorerBox.setStyleSheet("background-color : white") 
  
@@ -123,14 +123,14 @@ class Ui_MainWindow(QMainWindow):
         self.model.setRootPath(self.dir_path)
  
         self.treeView = QTreeView(self.explorerBox)   #File Tree View 
-        self.treeView.setGeometry(QRect(5, 20, 325, 641)) 
+        self.treeView.setGeometry(QRect(5, 20, round((windowX/100)*27.08), round((windowY/100)*71.23))) 
         self.treeView.setModel(self.model) 
         self.treeView.setRootIndex(self.model.index(self.dir_path)) 
-        self.treeView.setColumnWidth(0, 325) 
+        self.treeView.setColumnWidth(0, round((windowX/100)*27.08)) 
         self.treeView.clicked.connect(self.on_treeView_clicked)
  
         self.tabWidget = QTabWidget(self.centralWidget)   #Tab Widget 
-        self.tabWidget.setGeometry(QRect(1, 670, windowX, 189)) 
+        self.tabWidget.setGeometry(QRect(1, round((windowY/100)*74.45), windowX, round((windowY/100)*21))) 
         self.tabWidget.setCurrentIndex(0) 
  
         self.Errors_TAB = QWidget()   #Errors Tab 
@@ -138,20 +138,20 @@ class Ui_MainWindow(QMainWindow):
         self.error_Text = QPlainTextEdit(self.Errors_TAB) 
         self.error_Text.setReadOnly(True)
         self.error_Text.setStyleSheet("font-family: Courier")
-        self.error_Text.setGeometry(QRect(0, 0, windowX - 6 , 163))
+        self.error_Text.setGeometry(QRect(0, 0, windowX - 6 , round((windowY/100)*18.11)))
 
         self.Output_TAB = QWidget()   #Output Tab 
         self.tabWidget.addTab(self.Output_TAB, "Output") 
         self.output_Text = QPlainTextEdit(self.Output_TAB)
         self.output_Text.setReadOnly(True)
         self.output_Text.setStyleSheet("font-family: Courier")
-        self.output_Text.setGeometry(QRect(0, 0, windowX - 6 , 163))
+        self.output_Text.setGeometry(QRect(0, 0, windowX - 6 , round((windowY/100)*18.11)))
 
         self.Terminal_TAB = QWidget()
         self.tabWidget.addTab(self.Terminal_TAB, "Terminal")
         self.terminal_Console = QPlainTextEdit(self.Terminal_TAB)
         self.terminal_Console.setStyleSheet("font-family: Courier")
-        self.terminal_Console.setGeometry(QRect(0, 0, windowX - 6 , 163))
+        self.terminal_Console.setGeometry(QRect(0, 0, windowX - 6 , round((windowY/100)*18.11)))
     
         QMetaObject.connectSlotsByName(mainWindow)
         #           _____________________________ 
@@ -323,7 +323,7 @@ class CodeEditor(QPlainTextEdit):
             if block.isVisible() and bottom >= event.rect().top(): 
                 number = str(blockNumber + 1) 
                 painter.setPen(Qt.black) 
-                painter.drawText(0, top, self.lineNumberArea.width(),  
+                painter.drawText(0, top, round(self.lineNumberArea.width()),  
                     self.fontMetrics().height(), 
                     Qt.AlignRight, number) 
             block = block.next() 
