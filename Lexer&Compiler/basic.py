@@ -8,7 +8,7 @@ import string
 import os
 import math
 import time
-#import serial
+import serial
 
 #######################################
 # CONSTANTS
@@ -17,8 +17,8 @@ import time
 DIGITS = "0123456789"
 LETTERS = string.ascii_letters + "@" + "&" + "_"
 LETTERS_DIGITS = LETTERS + DIGITS
-#arduino = serial.Serial(port='COM5', baudrate=9600, timeout=0.1)
-#time.sleep(2)
+arduino = serial.Serial(port='COM5', baudrate=9600, timeout=0.1)
+time.sleep(2)
 global_posX = 0
 global_posY = 0
 has_main = False
@@ -2154,8 +2154,8 @@ class BuiltInFunction(BaseFunction):
         global_posY += value
 
         # Aqui va el movimiento del servomotor
-        #for x in range(int(str(value))):
-        #    arduino.write(bytes('w', 'ascii'))
+        for x in range(value):
+            arduino.write(bytes('w', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_continueup.arg_names = ["value"]
@@ -2182,8 +2182,8 @@ class BuiltInFunction(BaseFunction):
             )
         global_posY -= value
         # Aqui va el movimiento del servomotor
-        #for x in range(int(str(value))):
-        #    arduino.write(bytes('s', 'ascii'))
+        for x in range(value):
+            arduino.write(bytes('s', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_continuedown.arg_names = ["value"]
@@ -2210,8 +2210,8 @@ class BuiltInFunction(BaseFunction):
             )
         global_posX += value
         # Aqui va el movimiento del servomotor
-        #for x in range(int(str(value))):
-        #    arduino.write(bytes('d', 'ascii'))
+        for x in range(value):
+            arduino.write(bytes('d', 'ascii'))
         print("Derecha:")
         print(value)
         return RTResult().success(Number.null)
@@ -2242,8 +2242,8 @@ class BuiltInFunction(BaseFunction):
         global_posX -= value
 
         # Aqui va el movimiento del servomotor
-        #for x in range(int(str(value))):
-        #    arduino.write(bytes('a', 'ascii'))
+        for x in range(value):
+            arduino.write(bytes('a', 'ascii'))
         print("Izquierda:")
         print(value)
         return RTResult().success(Number.null)
@@ -2284,18 +2284,26 @@ class BuiltInFunction(BaseFunction):
         if global_posX >= posX:
             movement = global_posX - posX
             # Aqui va el movmiento del servomotor hacia la izquierda
+            for x in range(movement):
+                arduino.write(bytes('a', 'ascii'))
         if global_posX <= posX:
             movement = posX - global_posX
             # Aqui va el movimiento del servomotor hacia la derecha
+            for x in range(movement):
+                arduino.write(bytes('d', 'ascii'))
         global_posX = posX
 
         # Y COORDINATE
         if global_posY >= posY:
             movement = global_posY - posY
             # Aqui va el movmiento del servomotor hacia abajo
+            for x in range(movement):
+                arduino.write(bytes('s', 'ascii'))
         if global_posY <= posY:
             movement = posY - global_posY
             # Aqui va el movmiento del servomotor hacia arriba
+            for x in range(movement):
+                arduino.write(bytes('w', 'ascii'))
         global_posY = posY
 
         return RTResult().success(Number.null)
@@ -2317,9 +2325,13 @@ class BuiltInFunction(BaseFunction):
         if global_posX >= posX:
             movement = global_posX - posX
             # Aqui va el movmiento del servomotor hacia la izquierda
+            for x in range(movement):
+                arduino.write(bytes('a', 'ascii'))
         if global_posX <= posX:
             movement = posX - global_posX
             # Aqui va el movimiento del servomotor hacia la derecha
+            for x in range(movement):
+                arduino.write(bytes('d', 'ascii'))
         global_posX = posX
 
         return RTResult().success(Number.null)
@@ -2341,9 +2353,13 @@ class BuiltInFunction(BaseFunction):
         if global_posY >= posY:
             movement = global_posY - posY
             # Aqui va el movmiento del servomotor hacia abajo
+            for x in range(movement):
+                arduino.write(bytes('s', 'ascii'))
         if global_posY <= posY:
             movement = posY - global_posY
             # Aqui va el movmiento del servomotor hacia arriba
+            for x in range(movement):
+                arduino.write(bytes('w', 'ascii'))
         global_posY = posY
         return RTResult().success(Number.null)
 
@@ -2362,15 +2378,15 @@ class BuiltInFunction(BaseFunction):
             )
         if color.value == 1:
             # Aqui va el movimiento del servomotor
-            #arduino.write(bytes('r', 'ascii'))
+            arduino.write(bytes('r', 'ascii'))
             return RTResult().success(Number.null)
         elif color.value == 2:
             # Aqui va el movimiento del servomotor
-            #arduino.write(bytes('b', 'ascii'))
+            arduino.write(bytes('b', 'ascii'))
             return RTResult().success(Number.null)
         elif color.value == 3:
             # Aqui va el movimiento del servomotor
-            #arduino.write(bytes('g', 'ascii'))
+            arduino.write(bytes('g', 'ascii'))
             return RTResult().success(Number.null)
         else:
             return RTResult().failure(
@@ -2387,7 +2403,7 @@ class BuiltInFunction(BaseFunction):
     def execute_down(self, exec_ctx):
         print("Bajando...")
         # Aqui va el movimiento del servomotor
-        #arduino.write(bytes(' ', 'ascii'))
+        arduino.write(bytes(' ', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_down.arg_names = []
@@ -2395,7 +2411,7 @@ class BuiltInFunction(BaseFunction):
     def execute_up(self, exec_ctx):
         print("Subiendo...")
         # Aqui va el movimiento del servomotor
-        #arduino.write(bytes(' ', 'ascii'))
+        arduino.write(bytes(' ', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_up.arg_names = []
@@ -2406,7 +2422,11 @@ class BuiltInFunction(BaseFunction):
         global global_posY
         # Aqui va el movimiento del servomotor
         # Si o si, para la izquierda usando global_posX
+        for x in range(global_posX):
+            arduino.write(bytes('a', 'ascii'))
         # Y lo mismo para abajo usando global_posY
+        for x in range(global_posY):
+            arduino.write(bytes('s', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_begin.arg_names = []
