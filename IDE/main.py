@@ -3,8 +3,7 @@
  
 from PyQt5.QtWidgets import * 
 from PyQt5.QtCore import * 
-from PyQt5.QtGui import * 
-from PyQt5.Qsci import *
+from PyQt5.QtGui import *
 from PyQt5 import *
 from os.path import splitext
 import basic
@@ -323,7 +322,7 @@ class CodeEditor(QPlainTextEdit):
             if block.isVisible() and bottom >= event.rect().top(): 
                 number = str(blockNumber + 1) 
                 painter.setPen(Qt.black) 
-                painter.drawText(0, top, round(self.lineNumberArea.width()),  
+                painter.drawText(0, round(top), round(self.lineNumberArea.width()),  
                     self.fontMetrics().height(), 
                     Qt.AlignRight, number) 
             block = block.next() 
