@@ -2292,33 +2292,73 @@ class BuiltInFunction(BaseFunction):
         global global_posX
         global global_posY
 
-        # X COORDINATE
-        if global_posX >= posX:
-            movement = global_posX - posX
-            # Aqui va el movmiento del servomotor hacia la izquierda
-            for x in range(movement):
-                arduino.write(bytes('a', 'ascii'))
-        if global_posX <= posX:
-            movement = posX - global_posX
-            # Aqui va el movimiento del servomotor hacia la derecha
-            for x in range(movement):
+        if global_posX <= posX and global_posY <= posY:
+            while global_posX <= posX:
+                global_posX += 1
+                # Aqui va el movimiento del servomotor una unidad hacia la derecha
                 arduino.write(bytes('d', 'ascii'))
-        global_posX = posX
+                while global_posY <= posY:
+                    global_posY += 1
+                    # Aqui va el movimiento del servomotor una unidad hacia arriba
+                    arduino.write(bytes('w', 'ascii'))
+                    break
 
-        # Y COORDINATE
-        if global_posY >= posY:
-            movement = global_posY - posY
-            # Aqui va el movmiento del servomotor hacia abajo
-            for x in range(movement):
-                arduino.write(bytes('s', 'ascii'))
-        if global_posY <= posY:
-            movement = posY - global_posY
-            # Aqui va el movmiento del servomotor hacia arriba
-            for x in range(movement):
+        if global_posY <=posY:    
+            while global_posY <= posY:
+                # Aqui va el movimiento del servomotor una unidad hacia arriba
                 arduino.write(bytes('w', 'ascii'))
-        global_posY = posY
+                global_posY += 1
 
-        return RTResult().success(Number.null)
+        if global_posX >= posX and global_posY >= posY:
+            while posX <= global_posX:
+                # Aqui va el movimiento del servomotor una unidad hacia la izquierda
+                arduino.write(bytes('a', 'ascii'))
+                global_posX -= 1
+                while posY <= global_posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia abajo
+                    arduino.write(bytes('s', 'ascii'))
+                    global_posY -= 1
+                    break
+
+            if posY <= global_posY:
+                while posY <= global_posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia abajo
+                    arduino.write(bytes('s', 'ascii'))
+                    global_posY -= 1
+        
+        if global_posX >= posX and global_posY <= posY:
+            while posX <= global_posX:
+                # Aqui va el movimiento del servomotor una unidad hacia la izquierda
+                arduino.write(bytes('a', 'ascii'))
+                global_posX -= 1
+                while global_posY <= posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia arriba
+                    arduino.write(bytes('w', 'ascii'))
+                    global_posY += 1
+                    break
+        
+            if global_posY <=posY:    
+                while global_posY <= posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia arriba
+                    arduino.write(bytes('w', 'ascii'))
+                    global_posY += 1
+                
+        if global_posX <= posX and global_posY >= posY:
+            while global_posX <= posX:
+                global_posX += 1
+                # Aqui va el movimiento del servomotor una unidad hacia la derecha
+                arduino.write(bytes('d', 'ascii'))
+                while posY <= global_posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia abajo
+                    arduino.write(bytes('s', 'ascii'))
+                    global_posY -= 1
+                    break
+
+            if posY <= global_posY:
+                while posY <= global_posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia abajo
+                    arduino.write(bytes('s', 'ascii'))
+                    global_posY -= 1
 
     execute_pos.arg_names = ["posX", "posY"]
 
