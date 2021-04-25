@@ -55,7 +55,9 @@ Este proyecto fue realizado por:
 
 ## FAQs
 Una lista de preguntas frecuentes
-[https://pypi.org/help/](https://pypi.org/help/)
+
+* [https://pypi.org/help/](https://pypi.org/help/)
+* [https://www.python.org/about/help/](https://www.python.org/about/help/)
 
 ***
 | Tecnológico de Costa Rica | 2021 | Ingeniería en Computadores |
