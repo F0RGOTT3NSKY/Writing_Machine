@@ -2303,11 +2303,13 @@ class BuiltInFunction(BaseFunction):
                     arduino.write(bytes('w', 'ascii'))
                     break
 
-        if global_posY <=posY:    
-            while global_posY <= posY:
-                # Aqui va el movimiento del servomotor una unidad hacia arriba
-                arduino.write(bytes('w', 'ascii'))
-                global_posY += 1
+            if global_posY <=posY:    
+                while global_posY <= posY:
+                    # Aqui va el movimiento del servomotor una unidad hacia arriba
+                    arduino.write(bytes('w', 'ascii'))
+                    global_posY += 1
+                return RTResult().success(Number.null)
+            return RTResult().success(Number.null)
 
         if global_posX >= posX and global_posY >= posY:
             while posX <= global_posX:
@@ -2325,6 +2327,8 @@ class BuiltInFunction(BaseFunction):
                     # Aqui va el movimiento del servomotor una unidad hacia abajo
                     arduino.write(bytes('s', 'ascii'))
                     global_posY -= 1
+                return RTResult().success(Number.null)
+            return RTResult().success(Number.null)
         
         if global_posX >= posX and global_posY <= posY:
             while posX <= global_posX:
@@ -2342,6 +2346,8 @@ class BuiltInFunction(BaseFunction):
                     # Aqui va el movimiento del servomotor una unidad hacia arriba
                     arduino.write(bytes('w', 'ascii'))
                     global_posY += 1
+                return RTResult().success(Number.null)
+            return RTResult().success(Number.null)
                 
         if global_posX <= posX and global_posY >= posY:
             while global_posX <= posX:
@@ -2359,6 +2365,8 @@ class BuiltInFunction(BaseFunction):
                     # Aqui va el movimiento del servomotor una unidad hacia abajo
                     arduino.write(bytes('s', 'ascii'))
                     global_posY -= 1
+                return RTResult().success(Number.null)
+            return RTResult().success(Number.null)
 
     execute_pos.arg_names = ["posX", "posY"]
 
