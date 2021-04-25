@@ -2156,6 +2156,7 @@ class BuiltInFunction(BaseFunction):
         # Aqui va el movimiento del servomotor
         for x in range(value):
             arduino.write(bytes('w', 'ascii'))
+        time.sleep(1/6*value)
         return RTResult().success(Number.null)
 
     execute_continueup.arg_names = ["value"]
@@ -2184,6 +2185,7 @@ class BuiltInFunction(BaseFunction):
         # Aqui va el movimiento del servomotor
         for x in range(value):
             arduino.write(bytes('s', 'ascii'))
+        time.sleep(1/6*value)
         return RTResult().success(Number.null)
 
     execute_continuedown.arg_names = ["value"]
@@ -2212,8 +2214,7 @@ class BuiltInFunction(BaseFunction):
         # Aqui va el movimiento del servomotor
         for x in range(value):
             arduino.write(bytes('d', 'ascii'))
-        print("Derecha:")
-        print(value)
+        time.sleep(1/6*value)
         return RTResult().success(Number.null)
 
     execute_continueright.arg_names = ["value"]
@@ -2244,8 +2245,7 @@ class BuiltInFunction(BaseFunction):
         # Aqui va el movimiento del servomotor
         for x in range(value):
             arduino.write(bytes('a', 'ascii'))
-        print("Izquierda:")
-        print(value)
+        time.sleep(1/6*value)
         return RTResult().success(Number.null)
 
     execute_continueleft.arg_names = ["value"]
@@ -2297,16 +2297,19 @@ class BuiltInFunction(BaseFunction):
                 global_posX += 1
                 # Aqui va el movimiento del servomotor una unidad hacia la derecha
                 arduino.write(bytes('d', 'ascii'))
+                time.sleep(1/6)
                 while global_posY <= posY:
                     global_posY += 1
                     # Aqui va el movimiento del servomotor una unidad hacia arriba
                     arduino.write(bytes('w', 'ascii'))
+                    time.sleep(1/6)
                     break
 
             if global_posY <=posY:    
                 while global_posY <= posY:
                     # Aqui va el movimiento del servomotor una unidad hacia arriba
                     arduino.write(bytes('w', 'ascii'))
+                    time.sleep(1/6)
                     global_posY += 1
                 return RTResult().success(Number.null)
             return RTResult().success(Number.null)
@@ -2315,10 +2318,12 @@ class BuiltInFunction(BaseFunction):
             while posX <= global_posX:
                 # Aqui va el movimiento del servomotor una unidad hacia la izquierda
                 arduino.write(bytes('a', 'ascii'))
+                time.sleep(1/6)
                 global_posX -= 1
                 while posY <= global_posY:
                     # Aqui va el movimiento del servomotor una unidad hacia abajo
                     arduino.write(bytes('s', 'ascii'))
+                    time.sleep(1/6)
                     global_posY -= 1
                     break
 
@@ -2326,6 +2331,7 @@ class BuiltInFunction(BaseFunction):
                 while posY <= global_posY:
                     # Aqui va el movimiento del servomotor una unidad hacia abajo
                     arduino.write(bytes('s', 'ascii'))
+                    time.sleep(1/6)
                     global_posY -= 1
                 return RTResult().success(Number.null)
             return RTResult().success(Number.null)
@@ -2334,10 +2340,12 @@ class BuiltInFunction(BaseFunction):
             while posX <= global_posX:
                 # Aqui va el movimiento del servomotor una unidad hacia la izquierda
                 arduino.write(bytes('a', 'ascii'))
+                time.sleep(1/6)
                 global_posX -= 1
                 while global_posY <= posY:
                     # Aqui va el movimiento del servomotor una unidad hacia arriba
                     arduino.write(bytes('w', 'ascii'))
+                    time.sleep(1/6)
                     global_posY += 1
                     break
         
@@ -2345,6 +2353,7 @@ class BuiltInFunction(BaseFunction):
                 while global_posY <= posY:
                     # Aqui va el movimiento del servomotor una unidad hacia arriba
                     arduino.write(bytes('w', 'ascii'))
+                    time.sleep(1/6)
                     global_posY += 1
                 return RTResult().success(Number.null)
             return RTResult().success(Number.null)
@@ -2354,9 +2363,11 @@ class BuiltInFunction(BaseFunction):
                 global_posX += 1
                 # Aqui va el movimiento del servomotor una unidad hacia la derecha
                 arduino.write(bytes('d', 'ascii'))
+                time.sleep(1/6)
                 while posY <= global_posY:
                     # Aqui va el movimiento del servomotor una unidad hacia abajo
                     arduino.write(bytes('s', 'ascii'))
+                    time.sleep(1/6)
                     global_posY -= 1
                     break
 
@@ -2364,9 +2375,11 @@ class BuiltInFunction(BaseFunction):
                 while posY <= global_posY:
                     # Aqui va el movimiento del servomotor una unidad hacia abajo
                     arduino.write(bytes('s', 'ascii'))
+                    time.sleep(1/6)
                     global_posY -= 1
                 return RTResult().success(Number.null)
             return RTResult().success(Number.null)
+        return RTResult().success(Number.null)
 
     execute_pos.arg_names = ["posX", "posY"]
 
