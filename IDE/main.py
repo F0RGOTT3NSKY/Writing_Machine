@@ -3,8 +3,7 @@
  
 from PyQt5.QtWidgets import * 
 from PyQt5.QtCore import * 
-from PyQt5.QtGui import * 
-from PyQt5.Qsci import *
+from PyQt5.QtGui import *
 from PyQt5 import *
 from os.path import splitext
 import basic
