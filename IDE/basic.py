@@ -7,6 +7,8 @@ from strings_with_arrows import *
 import string
 import os
 import math
+import time
+import serial
 
 #######################################
 # CONSTANTS
@@ -15,6 +17,12 @@ import math
 DIGITS = "0123456789"
 LETTERS = string.ascii_letters + "@" + "&" + "_"
 LETTERS_DIGITS = LETTERS + DIGITS
+arduino = serial.Serial(port='COM5', baudrate=9600, timeout=0.1)
+time.sleep(2)
+global_posX = 0
+global_posY = 0
+has_main = False
+has_var = False
 
 #######################################
 # ERRORS
@@ -2131,10 +2139,23 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
+        
+        value = int(str(value))
+        global global_posY
+        if global_posY + value > 100:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posY += value
 
         # Aqui va el movimiento del servomotor
-        print("Arriba:")
-        print(value)
+        for x in range(value):
+            arduino.write(bytes('w', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_continueup.arg_names = ["value"]
@@ -2148,10 +2169,21 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-
+        value = int(str(value))
+        global global_posY
+        if global_posY - value < 0:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posY -= value
         # Aqui va el movimiento del servomotor
-        print("Abajo:")
-        print(value)
+        for x in range(value):
+            arduino.write(bytes('s', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_continuedown.arg_names = ["value"]
@@ -2165,8 +2197,21 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-
+        value = int(str(value))
+        global global_posX
+        if global_posX + value > 100:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posX += value
         # Aqui va el movimiento del servomotor
+        for x in range(value):
+            arduino.write(bytes('d', 'ascii'))
         print("Derecha:")
         print(value)
         return RTResult().success(Number.null)
@@ -2182,8 +2227,23 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
+        
+        value = int(str(value))
+        global global_posX
+        if global_posX - value < 0:
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Position out of limit",
+                    exec_ctx
+                )
+            )
+        global_posX -= value
 
         # Aqui va el movimiento del servomotor
+        for x in range(value):
+            arduino.write(bytes('a', 'ascii'))
         print("Izquierda:")
         print(value)
         return RTResult().success(Number.null)
@@ -2214,11 +2274,50 @@ class BuiltInFunction(BaseFunction):
                 )
             )
 
+
         # Aqui va el movimiento del servomotor
-        print("POS X:")
-        print(posX)
-        print("POS Y:")
-        print(posY)
+        posX = int(str(posX))
+        posY = int(str(posY))
+
+        if(posX > 100 or posY > 100 or posX < 0 or posY < 0):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Coordinate out of range. Check if the value is less than 100",
+                    exec_ctx,
+                )
+            )
+
+        global global_posX
+        global global_posY
+
+        # X COORDINATE
+        if global_posX >= posX:
+            movement = global_posX - posX
+            # Aqui va el movmiento del servomotor hacia la izquierda
+            for x in range(movement):
+                arduino.write(bytes('a', 'ascii'))
+        if global_posX <= posX:
+            movement = posX - global_posX
+            # Aqui va el movimiento del servomotor hacia la derecha
+            for x in range(movement):
+                arduino.write(bytes('d', 'ascii'))
+        global_posX = posX
+
+        # Y COORDINATE
+        if global_posY >= posY:
+            movement = global_posY - posY
+            # Aqui va el movmiento del servomotor hacia abajo
+            for x in range(movement):
+                arduino.write(bytes('s', 'ascii'))
+        if global_posY <= posY:
+            movement = posY - global_posY
+            # Aqui va el movmiento del servomotor hacia arriba
+            for x in range(movement):
+                arduino.write(bytes('w', 'ascii'))
+        global_posY = posY
+
         return RTResult().success(Number.null)
 
     execute_pos.arg_names = ["posX", "posY"]
@@ -2232,9 +2331,32 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-        # Aqui va el movimiento del servomotor
-        print("POS X:")
-        print(posX)
+        posX = int(str(posX))
+
+        if(posX > 100 or posX < 0 ):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Coordinate out of range. Check if the value is less than 100",
+                    exec_ctx,
+                )
+            )
+
+        global global_posX
+
+        if global_posX >= posX:
+            movement = global_posX - posX
+            # Aqui va el movmiento del servomotor hacia la izquierda
+            for x in range(movement):
+                arduino.write(bytes('a', 'ascii'))
+        if global_posX <= posX:
+            movement = posX - global_posX
+            # Aqui va el movimiento del servomotor hacia la derecha
+            for x in range(movement):
+                arduino.write(bytes('d', 'ascii'))
+        global_posX = posX
+
         return RTResult().success(Number.null)
 
     execute_posx.arg_names = ["posX"]
@@ -2248,9 +2370,31 @@ class BuiltInFunction(BaseFunction):
                     self.pos_start, self.pos_end, f"Argument must be a number", exec_ctx
                 )
             )
-        # Aqui va el movimiento del servomotor
-        print("POS Y:")
-        print(posY)
+        posY = int(str(posY))
+
+        if(posY > 100 or posY < 0 ):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Coordinate out of range. Check if the value is less than 100",
+                    exec_ctx,
+                )
+            )
+
+        global global_posY
+
+        if global_posY >= posY:
+            movement = global_posY - posY
+            # Aqui va el movmiento del servomotor hacia abajo
+            for x in range(movement):
+                arduino.write(bytes('s', 'ascii'))
+        if global_posY <= posY:
+            movement = posY - global_posY
+            # Aqui va el movmiento del servomotor hacia arriba
+            for x in range(movement):
+                arduino.write(bytes('w', 'ascii'))
+        global_posY = posY
         return RTResult().success(Number.null)
 
     execute_posy.arg_names = ["posY"]
@@ -2268,12 +2412,15 @@ class BuiltInFunction(BaseFunction):
             )
         if color.value == 1:
             # Aqui va el movimiento del servomotor
+            arduino.write(bytes('r', 'ascii'))
             return RTResult().success(Number.null)
         elif color.value == 2:
             # Aqui va el movimiento del servomotor
+            arduino.write(bytes('b', 'ascii'))
             return RTResult().success(Number.null)
         elif color.value == 3:
             # Aqui va el movimiento del servomotor
+            arduino.write(bytes('g', 'ascii'))
             return RTResult().success(Number.null)
         else:
             return RTResult().failure(
@@ -2290,6 +2437,7 @@ class BuiltInFunction(BaseFunction):
     def execute_down(self, exec_ctx):
         print("Bajando...")
         # Aqui va el movimiento del servomotor
+        arduino.write(bytes(' ', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_down.arg_names = []
@@ -2297,17 +2445,289 @@ class BuiltInFunction(BaseFunction):
     def execute_up(self, exec_ctx):
         print("Subiendo...")
         # Aqui va el movimiento del servomotor
+        arduino.write(bytes(' ', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_up.arg_names = []
 
     def execute_begin(self, exec_ctx):
         print("Volviendo a origen...")
+        global global_posX
+        global global_posY
         # Aqui va el movimiento del servomotor
+        # Si o si, para la izquierda usando global_posX
+        for x in range(global_posX):
+            arduino.write(bytes('a', 'ascii'))
+        # Y lo mismo para abajo usando global_posY
+        for x in range(global_posY):
+            arduino.write(bytes('s', 'ascii'))
         return RTResult().success(Number.null)
 
     execute_begin.arg_names = []
 
+    def execute_greater(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        if number1 > number2:
+            return RTResult().success(Number.true)
+        else:
+            return RTResult().success(Number.false)
+
+    execute_greater.arg_names = ["number1", "number2"]
+
+    def execute_smaller(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        if number1 < number2:
+            return RTResult().success(Number.true)
+        else:
+            return RTResult().success(Number.false)
+
+    execute_smaller.arg_names = ["number1", "number2"]
+
+    def execute_substr(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        result = number1 - number2
+        return RTResult().success(Number(result))
+
+    execute_substr.arg_names = ["number1", "number2"]
+
+    def execute_mult(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        result = number1 * number2
+        return RTResult().success(Number(result))
+
+    execute_mult.arg_names = ["number1", "number2"]
+
+    def execute_power(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        result = number1 ** number2
+        return RTResult().success(Number(result))
+
+    execute_power.arg_names = ["number1", "number2"]
+
+    def execute_div(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        result = number1 / number2
+        return RTResult().success(Number(result))
+
+    execute_div.arg_names = ["number1", "number2"]
+
+    def execute_sum(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        result = number1 + number2
+        return RTResult().success(Number(result))
+
+    execute_sum.arg_names = ["number1", "number2"]
+
+    def execute_random(self, exec_ctx):
+        number = exec_ctx.symbol_table.get("number")
+        if not isinstance(number, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number = int(str(number))
+        number = random.randint(0, number)
+        return RTResult().success(Number(number))
+
+    execute_random.arg_names = ["number"]
+
+    def execute_equal(self, exec_ctx):
+        number1 = exec_ctx.symbol_table.get("number1")
+        number2 = exec_ctx.symbol_table.get("number2")
+
+        if not isinstance(number1, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"First argument must be a number",
+                    exec_ctx
+                )
+            )
+
+        if not isinstance(number2, Number):
+            return RTResult().failure(
+                RTError(
+                    self.pos_start,
+                    self.pos_end,
+                    f"Second argument must be a number",
+                    exec_ctx
+                )
+            )
+        number1 = int(str(number1))
+        number2 = int(str(number2))
+
+        if number1 == number2:
+            return RTResult().success(Number.true)
+        else:
+            return RTResult().success(Number.false)
+    
+    execute_equal.arg_names = ["number1", "number2"]
 
 BuiltInFunction.print = BuiltInFunction("print")
 BuiltInFunction.print_ret = BuiltInFunction("print_ret")
@@ -2334,6 +2754,15 @@ BuiltInFunction.usecolor = BuiltInFunction("usecolor")
 BuiltInFunction.down = BuiltInFunction("down")
 BuiltInFunction.up = BuiltInFunction("up")
 BuiltInFunction.begin = BuiltInFunction("begin")
+BuiltInFunction.greater = BuiltInFunction("greater")
+BuiltInFunction.smaller = BuiltInFunction("smaller")
+BuiltInFunction.substr = BuiltInFunction("substr")
+BuiltInFunction.mult = BuiltInFunction("mult")
+BuiltInFunction.power = BuiltInFunction("power")
+BuiltInFunction.div = BuiltInFunction("div")
+BuiltInFunction.sum = BuiltInFunction("sum")
+BuiltInFunction.random = BuiltInFunction("random")
+BuiltInFunction.equal = BuiltInFunction("equal")
 
 #######################################
 # CONTEXT
@@ -2709,6 +3138,15 @@ global_symbol_table.set("USECOLOR", BuiltInFunction.usecolor)
 global_symbol_table.set("DOWN", BuiltInFunction.down)
 global_symbol_table.set("UP", BuiltInFunction.up)
 global_symbol_table.set("BEGIN", BuiltInFunction.begin)
+global_symbol_table.set("GREATER", BuiltInFunction.greater)
+global_symbol_table.set("SMALLER", BuiltInFunction.smaller)
+global_symbol_table.set("SUBSTR", BuiltInFunction.substr)
+global_symbol_table.set("MULT", BuiltInFunction.mult)
+global_symbol_table.set("POWER", BuiltInFunction.power)
+global_symbol_table.set("DIV", BuiltInFunction.div)
+global_symbol_table.set("SUM", BuiltInFunction.sum)
+global_symbol_table.set("RANDOM", BuiltInFunction.random)
+global_symbol_table.set("EQUAL", BuiltInFunction.equal)
 
 
 def run(fn, text):
