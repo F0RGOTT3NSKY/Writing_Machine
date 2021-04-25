@@ -2293,13 +2293,13 @@ class BuiltInFunction(BaseFunction):
         global global_posY
 
         if global_posX <= posX and global_posY <= posY:
-        while global_posX <= posX:
-            global_posX += 1
-            # Aqui va el movimiento del servomotor una unidad hacia la derecha
-            while global_posY <= posY:
-                global_posY += 1
-                # Aqui va el movimiento del servomotor una unidad hacia arriba
-                break
+            while global_posX <= posX:
+                global_posX += 1
+                # Aqui va el movimiento del servomotor una unidad hacia la derecha
+                while global_posY <= posY:
+                    global_posY += 1
+                    # Aqui va el movimiento del servomotor una unidad hacia arriba
+                    break
 
         if global_posY <=posY:    
             while global_posY <= posY:
