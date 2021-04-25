@@ -48,10 +48,6 @@ class Ui_MainWindow(QMainWindow):
         self.menuRun = QMenu(self.menuBar)    #Menu Run 
         self.menuRun.setTitle("Run") 
         self.menuBar.addAction(self.menuRun.menuAction()) 
-         
-        self.menuHelp = QMenu(self.menuBar)   #Menu Help 
-        self.menuHelp.setTitle("Help") 
-        self.menuBar.addAction(self.menuHelp.menuAction()) 
  
         self.actionNew_File = QAction(mainWindow, triggered = self.new_file) #Action New File 
         self.actionNew_File.setText("New File") 
@@ -72,14 +68,6 @@ class Ui_MainWindow(QMainWindow):
         self.actionCompile = QAction(mainWindow, triggered = self.Compile)  #Action Compile 
         self.actionCompile.setText("Compile") 
         self.menuRun.addAction(self.actionCompile)
- 
-        self.actionAbout = QAction(mainWindow)    #Action About 
-        self.actionAbout.setText("About") 
-        self.menuHelp.addAction(self.actionAbout) 
- 
-        self.actionWiki = QAction(mainWindow) #Action Wiki 
-        self.actionWiki.setText("Wiki") 
-        self.menuHelp.addAction(self.actionWiki) 
  
         self.actionBuild = QAction(mainWindow, triggered = self.Compile_Run)    #Action Compile and Run 
         self.actionBuild.setText("Compile and Run") 
